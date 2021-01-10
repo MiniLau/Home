@@ -1,0 +1,5 @@
+# Update all docker images (once a week)
+0 4 * * 0 /usr/bin/docker images |grep -v REPOSITORY|awk '{print $1}'|xargs -L1 /usr/bin/docker pull && /usr/local/bin/docker-compose stop && /usr/local/bin/docker-compose up -d
+
+# Remove unused resources (once a month)
+0 4 1 * * /usr/bin/docker system prune -a -f

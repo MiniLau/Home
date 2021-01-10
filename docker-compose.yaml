@@ -1,0 +1,68 @@
+version: '3.7'
+services:
+  # Reverse-Proxy to have local domain name
+  nginx-proxy:
+    # image: jwilder/nginx-proxy  # for pure linux
+    image: alexanderkrause/rpi-nginx-proxy:alpine # for raspberry
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - nginx-proxy
+    restart: always
+    environment:
+      DEFAULT_HOST: pihole.${PI_DOMAIN}
+
+  # Pi-hole image
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "10080:80/tcp"
+    env_file:
+      - .env
+      - ./env/.public.env
+      - ./env/pihole/.public.env
+      - ./env/pihole/.secret.env
+    environment:
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ServerIP=${HOST}
+      - VIRTUAL_HOST=pihole.${PI_DOMAIN}
+    volumes:
+      - './docker/pihole/dnsmasq.d/:/etc/dnsmasq.d/'
+      - './docker/pihole/pihole/:/etc/pihole/'
+    dns:
+      - 127.0.0.1
+    cap_add:
+      - NET_ADMIN
+    extra_hosts:
+      - '${PI_DOMAIN}:${HOST}'
+      - 'pihole pihole.${PI_DOMAIN}:${HOST}'
+    depends_on:
+      - dhcphelper
+    networks:
+      backend:
+        ipv4_address: "172.16.238.10"
+      nginx-proxy:
+    restart: unless-stopped
+
+  # DHCP Relay for the DHCP server of pihole
+  dhcphelper:
+    container_name: dhcphelper
+    build: ./docker/dhcp-helper
+    restart: unless-stopped
+    network_mode: "host"
+    command: -s 172.16.238.10
+    cap_add:
+      - NET_ADMIN
+
+networks:
+  nginx-proxy:
+  backend:
+    ipam:
+      config:
+        - subnet: 172.16.238.0/16
