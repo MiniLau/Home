@@ -1,0 +1,10 @@
+- alias: Synchronize IOT devices on HA start-up
+  initial_state: true
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "home/BedLEDStrip"
+        payload: ""

@@ -5,36 +5,38 @@ services:
     # image: jwilder/nginx-proxy  # for pure linux
     image: alexanderkrause/rpi-nginx-proxy:alpine # for raspberry
     container_name: nginx-proxy
-    ports:
-      - "80:80"
+    environment:
+      DEFAULT_HOST: pihole.${PI_DOMAIN}
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./docker/nginx-proxy/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"
     networks:
       - nginx-proxy
     restart: always
-    environment:
-      DEFAULT_HOST: pihole.${PI_DOMAIN}
 
+  ################################### PiHole ###################################
   # Pi-hole image
   pihole:
     container_name: pihole
-    image: pihole/pihole:latest
+    build: docker/pihole
     ports:
       - "53:53/tcp"
       - "53:53/udp"
       - "10080:80/tcp"
     env_file:
       - .env
-      - ./env/.public.env
       - ./env/pihole/.public.env
       - ./env/pihole/.secret.env
     environment:
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - VIRTUAL_PORT=80
       - ServerIP=${HOST}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
       - VIRTUAL_HOST=pihole.${PI_DOMAIN}
     volumes:
-      - './docker/pihole/dnsmasq.d/:/etc/dnsmasq.d/'
       - './docker/pihole/pihole/:/etc/pihole/'
+      - './docker/pihole/dnsmasq.d/:/etc/dnsmasq.d/'
     dns:
       - 127.0.0.1
     cap_add:
@@ -42,27 +44,70 @@ services:
     extra_hosts:
       - '${PI_DOMAIN}:${HOST}'
       - 'pihole pihole.${PI_DOMAIN}:${HOST}'
+      - 'home-assistant ha.${PI_DOMAIN}:${HOST}'
     depends_on:
       - dhcphelper
     networks:
-      backend:
-        ipv4_address: "172.16.238.10"
+      backend_dhcp:
+        ipv4_address: "172.16.20.10"
       nginx-proxy:
-    restart: unless-stopped
+    restart: always
 
   # DHCP Relay for the DHCP server of pihole
   dhcphelper:
     container_name: dhcphelper
-    build: ./docker/dhcp-helper
+    build: docker/dhcp-helper
     restart: unless-stopped
     network_mode: "host"
-    command: -s 172.16.238.10
+    command: -s 172.16.20.10
     cap_add:
       - NET_ADMIN
 
+  ############################### Home Assistant ###############################
+  home-assistant:
+    container_name: home-assistant
+    image: homeassistant/home-assistant:latest
+    depends_on:
+      - mqtt #https://www.home-assistant.io/docs/mqtt/broker note when on same server
+    env_file:
+      - .env
+      - ./env/mqtt/.public.env
+      - ./env/mqtt/.secret.env
+      - ./env/home-assistant/.public.env
+      - ./env/home-assistant/.secret.env
+    environment:
+      - VIRTUAL_PORT=8123
+      - VIRTUAL_HOST=ha.${PI_DOMAIN}
+    volumes:
+      - ./docker/home-assistant:/config
+    ports:
+      - "8123:8123"
+    networks:
+      backend_ha:
+      nginx-proxy:
+    restart: unless-stopped
+
+  mqtt:
+    container_name: mqtt
+    image: mosquitto-broker
+    build: docker/mosquitto
+    env_file:
+      - ./env/mqtt/.public.env
+      - ./env/mqtt/.secret.env
+    volumes:
+      - ./docker/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      backend_ha:
+    restart: always
+
+
 networks:
   nginx-proxy:
-  backend:
+  backend_ha:
+  backend_dhcp:
     ipam:
       config:
-        - subnet: 172.16.238.0/16
+        - subnet: 172.16.20.0/24

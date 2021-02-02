@@ -19,6 +19,6 @@ pip3 install docker-compose
 
 
 # Installing third party dependencies
-apt-get install -y vim
+apt-get install -y vim git
 
 fi

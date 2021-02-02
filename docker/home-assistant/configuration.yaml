@@ -1,0 +1,50 @@
+# official frontend to control Home Assistant.
+frontend:
+# display panels in the frontend to configure and manage parts of Home Assistant.
+config:
+# allows Home Assistant mobile apps to easily integrate with Home Assistant.
+mobile_app:
+# scan the network for supported devices and services.
+ssdp:
+zeroconf:
+# provides an API to offer information on the system and its components.
+system_health:
+# sunrise and sunset time based on location
+sun:
+history:
+  exclude:
+    domains:
+      - automation
+      - weather
+      - sun
+      - person
+    entities:
+      - camera.buienradar_camera
+
+
+homeassistant:
+  time_zone: !env_var TZ
+  name: !env_var HOME_NAME
+  unit_system: !env_var UNIT
+  latitude: !env_var HOME_LATITUDE
+  longitude: !env_var HOME_LONGITUDE
+  elevation: !env_var HOME_ELEVATION
+
+
+mqtt:
+  broker: mqtt
+  port: 1883
+  username: !env_var MOSQUITTO_USERNAME
+  password: !env_var MOSQUITTO_PASSWORD
+
+
+automation: !include_dir_merge_list automation/
+
+
+camera:
+  - platform: buienradar
+    name: Buienradar Camera
+    country_code: BE
+
+
+light: !include_dir_list lights/

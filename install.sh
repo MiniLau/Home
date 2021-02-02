@@ -7,16 +7,19 @@ else
 
 
 echo "Raspberry dependencies ..."
-source scripts/dependencies.sh
+source scripts/install/dependencies.sh
 
 echo "Raspberry IP address ..."
-source scripts/raspberry_ip.sh
+source scripts/install/raspberry_ip.sh
 
 echo "Raspberry security ..."
-source scripts/raspberry_security.sh
+source scripts/install/raspberry_security.sh
 
 echo "Raspberry crons"
 crontab cronjobs.txt
+
+echo "Plex Server raspberry compatible image ..."
+source scripts/install/plex_docker_construct.sh
 
 echo "Rebooting now ..."
 reboot

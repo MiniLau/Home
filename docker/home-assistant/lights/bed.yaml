@@ -1,0 +1,51 @@
+qos: 0
+name: Bed
+rgb: true
+effect: true
+schema: json
+platform: mqtt
+state_topic: "home/BedLEDStrip"
+command_topic: "home/BedLEDStrip/set"
+availability_topic: "home/BedLEDStrip/LWT"
+effect_list:
+  - Solid
+  - Music - L2R
+  - Music - Middle
+  - Music - Fma965
+  - BPM
+  - Candy Cane
+  - Confetti
+  - Cyclon Rainbow
+  - Dots
+  - Fire
+  - Glitter
+  - Juggle
+  - Lightning
+  - Noise
+  - Police All
+  - Police One
+  - Rainbow
+  - Rainbow With Glitter
+  - Ripple
+  - Twinkle
+  - Sinelon
+  - Sine Hue
+  - Full Hue
+  - Breathe
+  - Hue Breathe
+  - Christmas
+  - Christmas Alternate
+  - Random Stars
+  - St Patty
+  - Valentine
+  - Turkey Day
+  - Thanksgiving
+  - USA
+  - Independence
+  - Halloween
+  - Go Lions
+  - Hail
+  - Touchdown
+  - Punkin
+  - Lovey Day
+  - Holly Jolly
