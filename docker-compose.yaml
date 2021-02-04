@@ -43,6 +43,7 @@ services:
       - NET_ADMIN
     extra_hosts:
       - '${PI_DOMAIN}:${HOST}'
+      - 'mqtt mqtt.${PI_DOMAIN}:${HOST}'
       - 'pihole pihole.${PI_DOMAIN}:${HOST}'
       - 'home-assistant ha.${PI_DOMAIN}:${HOST}'
     depends_on:
@@ -94,6 +95,9 @@ services:
     env_file:
       - ./env/mqtt/.public.env
       - ./env/mqtt/.secret.env
+    environment:
+      - VIRTUAL_PORT=1883
+      - VIRTUAL_HOST=mqtt.${PI_DOMAIN}
     volumes:
       - ./docker/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
     ports:

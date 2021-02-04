@@ -48,3 +48,5 @@ camera:
 
 
 light: !include_dir_list lights/
+
+switch: !include_dir_list switches/

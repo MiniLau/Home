@@ -6,5 +6,9 @@
   action:
     - service: mqtt.publish
       data:
+        topic: "cmnd/sonoff_S2X_Desktop/POWER"
+        payload: ""
+    - service: mqtt.publish
+      data:
         topic: "home/BedLEDStrip"
         payload: ""

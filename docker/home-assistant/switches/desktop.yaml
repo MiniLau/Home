@@ -1,0 +1,12 @@
+qos: 0
+retain: true
+platform: mqtt
+name: "Desktop"
+payload_on: "ON"
+payload_off: "OFF"
+icon: mdi:desktop-classic
+payload_available: "Online"
+payload_not_available: "Offline"
+state_topic: "stat/sonoff_S2X_Desktop/POWER"
+command_topic: "cmnd/sonoff_S2X_Desktop/POWER"
+availability_topic: "tele/sonoff_S2X_Desktop/LWT"
